@@ -23,6 +23,15 @@ func (r *TransactionRepository) CreateTransaction(transaction *models.Transactio
 	return transaction, nil
 }
 
+func (r *TransactionRepository) CreateTransactionByUserID(transaction *models.Transaction) (*models.Transaction, error) {
+	// Create the transaction in the database
+	if err := r.db.Create(transaction).Error; err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
+}
+
 
 func (r *TransactionRepository) ListTransactions() ([]models.Transaction, error) {
 	// Get all transactions from the database
@@ -33,3 +42,12 @@ func (r *TransactionRepository) ListTransactions() ([]models.Transaction, error)
 
 	return transactions, nil
 }
+
+func (r *TransactionRepository) GetTransactionsByUserID(userID uint) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	if err := r.db.Where("user_id = ?", userID).Find(&transactions).Error; err != nil {
+		return nil, err
+	}
+	return transactions, nil
+}
+

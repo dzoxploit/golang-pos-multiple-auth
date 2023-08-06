@@ -61,21 +61,25 @@ func main() {
 	api := r.Group("/api")
 	{
 
-		productRoutes := api.Group("/products")
-		productRoutes.Use(middlewares.AuthenticateAdmin())
+		userRoutes := api.Group("/users")
+		userRoutes.Use(middlewares.Authenticate())
 		{
-			productRoutes.GET("/", productController.ListProducts)
-			productRoutes.POST("/create", productController.CreateProduct)
-			productRoutes.GET("/:id", productController.GetProduct)
-			productRoutes.PUT("/:id", productController.UpdateProduct)
-			productRoutes.DELETE("/:id", productController.DeleteProduct)
+			userRoutes.GET("/", productController.ListProducts)
+			userRoutes.GET("/transactions", transactionController.ListTransactionsByUserID)
+			userRoutes.POST("/transaction", transactionController.CreateTransactionByUserID)
 		}
 
-		transactionRoutes := api.Group("/transactions")
-		transactionRoutes.Use(middlewares.Authenticate())
+		adminRoutes := api.Group("/admins")
+		adminRoutes.Use(middlewares.AuthenticateAdmin())
 		{
-			transactionRoutes.POST("/", transactionController.CreateTransaction)
-			transactionRoutes.GET("/", transactionController.ListTransactions)
+			adminRoutes.GET("/", productController.ListProducts)
+			adminRoutes.POST("/create", productController.CreateProduct)
+			adminRoutes.GET("/:id", productController.GetProduct)
+			adminRoutes.PUT("/:id", productController.UpdateProduct)
+			adminRoutes.DELETE("/:id", productController.DeleteProduct)
+			
+			adminRoutes.POST("/transaction", transactionController.CreateTransaction)
+			adminRoutes.GET("/transactions", transactionController.ListTransactions)
 		}
 	}
 
