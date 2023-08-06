@@ -37,7 +37,7 @@ func (s *AuthService) Register(user *models.User) error {
 	return s.userRepository.CreateUser(user)
 }
 
-func (s *AuthService) Login(username, password string) (string, error) {
+func (s *AuthService) Login(username, password, email string) (string, error) {
 	// Get the user from the database by username
 	user, err := s.userRepository.GetUserByUsername(username)
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *AuthService) Login(username, password string) (string, error) {
 	}
 
 	// Generate the JWT token
-	token, err := utils.GenerateToken(user.ID, user.Username)
+	token, err := utils.GenerateToken(user.ID, user.Username, user.Email)
 	if err != nil {
 		return "", err
 	}

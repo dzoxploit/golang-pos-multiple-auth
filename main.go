@@ -80,6 +80,7 @@ func main() {
 			
 			adminRoutes.POST("/transaction", transactionController.CreateTransaction)
 			adminRoutes.GET("/transactions", transactionController.ListTransactions)
+			adminRoutes.GET("/transactions/generate-csv", transactionController.GenerateCSVTransactions)
 		}
 	}
 

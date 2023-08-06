@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gocommerce/models"
 	"gocommerce/repositories"
+	"gocommerce/utils"
 	"strconv"
 
 	"github.com/jinzhu/gorm"
@@ -70,19 +71,21 @@ func (s *TransactionService) GetTransactionsByUserID(userID uint) ([]models.Tran
 	return s.transactionRepository.GetTransactionsByUserID(userID)
 }
 
-func (s *TransactionService) generateCSV(transactions []*models.Transaction) ([]byte, error) {
+func (s *TransactionService) GenerateCSV(transactions []*models.TransactionJoin) ([]byte, error) {
 	// Create a buffer to store CSV data
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 
 	// Write the CSV header
-	header := []string{"Transaction ID", "Description", "Amount", "Date"}
+	header := []string{"Transaction ID", "Product Name", "User Name", "Amount", "Date"}
 	writer.Write(header)
 
 	// Write transaction data
 	for _, transaction := range transactions {
 		row := []string{
 			strconv.Itoa(int(transaction.ID)),
+			transaction.Product,
+			transaction.Username,
 			strconv.FormatFloat(transaction.Amount, 'f', 2, 64),
 			transaction.OrderDate.Format("2006-01-02"),
 		}
@@ -99,3 +102,27 @@ func (s *TransactionService) generateCSV(transactions []*models.Transaction) ([]
 	return buf.Bytes(), nil
 }
 
+func (s *TransactionService) SendEmailAfterTransaction(transaction *models.Transaction, receiptEmail string) error {
+	subject := "Transaction Confirmation"
+	body := fmt.Sprintf("Dear User,\n\nYour transaction has been created with the following details:\n\n"+
+		"Transaction ID: %d\nProduct: %d\nQuantity: %d\nAmount: %.2f\n\n"+
+		"Thank you for your purchase!\n\nBest regards,\nYour Company Name",
+		transaction.ID, transaction.ProductID, transaction.Quantity, transaction.Amount)
+	
+	err := utils.SendEmail(receiptEmail, subject, body)
+	return err
+}
+
+func (s *TransactionService) ListTransactionJoin() ([]*models.TransactionJoin, error) {
+	transactions, err := s.transactionRepository.ListTransactionJoin()
+	if err != nil {
+		return nil, err
+	}
+
+	transactionPointers := make([]*models.TransactionJoin, len(transactions))
+	for i := range transactions {
+		transactionPointers[i] = &transactions[i]
+	}
+
+	return transactionPointers, nil
+}

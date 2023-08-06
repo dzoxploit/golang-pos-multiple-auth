@@ -51,3 +51,16 @@ func (r *TransactionRepository) GetTransactionsByUserID(userID uint) ([]models.T
 	return transactions, nil
 }
 
+func (r *TransactionRepository) ListTransactionJoin() ([]models.TransactionJoin, error) {
+	var transactions []models.TransactionJoin
+	if err := r.db.Table("transactions").
+		Select("transactions.*, products.name as product, users.username").
+		Joins("JOIN products ON products.id = transactions.product_id").
+		Joins("JOIN users ON users.id = transactions.user_id").
+		Scan(&transactions).Error; err != nil {
+		return nil, err
+	}
+
+	return transactions, nil
+}
+

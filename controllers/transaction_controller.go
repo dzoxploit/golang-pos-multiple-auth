@@ -46,6 +46,21 @@ func (c *TransactionController) CreateTransaction(ctx *gin.Context) {
 
 func (c *TransactionController) CreateTransactionByUserID(ctx *gin.Context) {
     var transaction models.Transaction
+
+	email, ok := ctx.Get("email")
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	// Convert userID to uint (assuming it's stored as uint in the database)
+	emailString, ok := email.(string)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+
     if err := ctx.ShouldBindJSON(&transaction); err != nil {
         utils.SendErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload")
         return
@@ -78,6 +93,10 @@ func (c *TransactionController) CreateTransactionByUserID(ctx *gin.Context) {
         return
     }
 
+
+	receiptEmail := emailString // Replace with the actual email of the user
+	err = c.transactionService.SendEmailAfterTransaction(createdTransaction, receiptEmail)
+
     utils.SendSuccessResponse(ctx, http.StatusCreated, "Transaction created successfully", createdTransaction)
 }
 
@@ -93,7 +112,7 @@ func (c *TransactionController) ListTransactions(ctx *gin.Context) {
 
 func (c *TransactionController) GenerateCSVTransactions(ctx *gin.Context) {
 	// Fetch the list of transactions from the service
-	transactions, err := c.transactionService.ListTransactions()
+	transactions, err := c.transactionService.ListTransactionJoin()
 	if err != nil {
 		// Handle the error, return error response
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch transactions"})
@@ -101,7 +120,7 @@ func (c *TransactionController) GenerateCSVTransactions(ctx *gin.Context) {
 	}
 
 	// Call the CSV generator function to convert transactions to CSV data
-	csvData, err := utils.generateCSV(transactions)
+	csvData, err := c.transactionService.GenerateCSV(transactions)
 	if err != nil {
 		// Handle the error, return error response
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSV"})

@@ -73,6 +73,7 @@ func ValidateTokenAdmin(signedToken string) (claims *SignedAdminDetails, err err
     }
     return claims, nil
 }
+
 // HashPassword hashes the provided password using a secure hashing algorithm (bcrypt).
 func HashPasswordAdmin(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

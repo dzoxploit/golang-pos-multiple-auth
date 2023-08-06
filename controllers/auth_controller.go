@@ -52,7 +52,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 
 
 	// Authenticate the user
-	jwtToken, err := c.authService.Login(user.Username, user.Password)
+	jwtToken, err := c.authService.Login(user.Username, user.Password, user.Email)
 	if err != nil {
 		if err == services.ErrUserNotFound {
 			utils.SendErrorResponse(ctx, http.StatusUnauthorized, "User not found")

@@ -18,6 +18,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 type SignedDetails struct {
     Uid        uint
     Username   string
+	Email	   string
     jwt.StandardClaims
 }
 
@@ -30,11 +31,12 @@ func GetJWTSecretKey() ([]byte, error) {
 }
 
 // GenerateToken generates a new JWT token with the given user ID as the subject.
-func GenerateToken(userID uint, username string) (signedToken string, err error) {
+func GenerateToken(userID uint, username string, email string) (signedToken string, err error) {
 	
 	claims := &SignedDetails{
         Uid:        userID,
         Username:  username,
+		Email:     email,
         StandardClaims: jwt.StandardClaims{
             ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
         },

@@ -62,7 +62,7 @@ func (s *AuthAdminService) LoginAdmin(email, password string) (string, error) {
 	}
 
 	// Generate the JWT token
-	token, err := utils.GenerateToken(uint(admin.ID), admin.Email)
+	token, err := utils.GenerateTokenAdmin(uint(admin.ID), admin.Email)
 	if err != nil {
 		return "", err
 	}
